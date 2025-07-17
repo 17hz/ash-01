@@ -1,0 +1,8 @@
+public/
+
+.prettierignore
+.gitignore
+
+pnpm-lock.yaml
+
+favicon.ico

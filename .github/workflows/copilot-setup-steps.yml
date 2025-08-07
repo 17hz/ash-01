@@ -40,3 +40,10 @@ jobs:
 
       - name: Install JavaScript dependencies
         run: pnpm i
+
+      - name: Create environment file
+        run: |
+          cat > .env.local << EOF
+          DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY }}
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          EOF

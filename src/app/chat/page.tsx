@@ -23,6 +23,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true)
   const [sidebarVisible, setSidebarVisible] = useState(false)
   const [input, setInput] = useState('')
+  const [isMounted, setIsMounted] = useState(false)
 
   const { messages, status, sendMessage, setMessages } = useChat({
     body: { conversationId: currentConversationId },
@@ -30,6 +31,7 @@ export default function ChatPage() {
 
   // Load conversations on component mount
   useEffect(() => {
+    setIsMounted(true)
     loadConversations()
   }, [])
 
@@ -132,7 +134,7 @@ export default function ChatPage() {
         width: 300, 
         background: '#fafafa', 
         borderRight: '1px solid #d9d9d9',
-        display: typeof window !== 'undefined' && window.innerWidth > 768 ? 'block' : 'none'
+        display: isMounted && window.innerWidth > 768 ? 'block' : 'none'
       }}>
         <div style={{ padding: 16 }}>
           <Button 
@@ -263,7 +265,7 @@ export default function ChatPage() {
           <Button 
             type="text" 
             onClick={() => setSidebarVisible(true)}
-            style={{ display: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'block' : 'none' }}
+            style={{ display: isMounted && window.innerWidth <= 768 ? 'block' : 'none' }}
           >
             ☰
           </Button>

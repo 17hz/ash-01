@@ -6,10 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:report": "playwright show-report"
+    "lint": "next lint"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.0",

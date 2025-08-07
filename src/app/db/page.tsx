@@ -1,17 +1,39 @@
-import * as schema from '@/db/schema'
+'use client'
+
+import { useEffect, useState } from 'react'
 import { usersTable } from '@/db/schema'
-import { neon } from '@neondatabase/serverless'
-import { drizzle } from 'drizzle-orm/neon-http'
 
-const sql = neon(process.env.DATABASE_URL!)
-const db = drizzle({ client: sql, schema: schema })
+type User = typeof usersTable.$inferSelect
 
-export default async function DbPage() {
-  const users = await db.select().from(usersTable)
+export default function DbPage() {
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  if (users.length === 0) {
-    return <div>no data</div>
-  }
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const response = await fetch('/api/users')
+        if (response.ok) {
+          const data = await response.json()
+          setUsers(data.users || [])
+        } else {
+          setError('Failed to fetch users')
+        }
+      } catch {
+        setError('Error connecting to database')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUsers()
+  }, [])
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error}</div>
+  if (users.length === 0) return <div>no data</div>
+
   return (
     <div>
       {users.map((user) => (

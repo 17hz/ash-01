@@ -1,4 +1,4 @@
-import { getConversations, createConversation, generateConversationTitle } from '@/lib/db-operations'
+import { getConversations, createConversation } from '@/lib/db-operations'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET() {

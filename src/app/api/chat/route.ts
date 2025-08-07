@@ -11,10 +11,8 @@ import z from 'zod'
 import { 
   createConversation, 
   createMessage, 
-  getConversationById, 
   generateConversationTitle,
-  updateConversation,
-  getMessagesByConversationId
+  updateConversation
 } from '@/lib/db-operations'
 
 const pino = Pino({
@@ -52,7 +50,7 @@ export async function POST(req: Request) {
     const firstUserMessage = messages.find((m: UIMessage) => m.role === 'user')
     if (firstUserMessage) {
       const title = generateConversationTitle(
-        firstUserMessage.parts?.find((p: any) => p.type === 'text')?.text || 'New Conversation'
+        firstUserMessage.parts?.find((p: { type: string; text?: string }) => p.type === 'text')?.text || 'New Conversation'
       )
       const conversation = await createConversation({
         title,
@@ -69,7 +67,7 @@ export async function POST(req: Request) {
       await createMessage({
         conversationId: currentConversationId,
         role: 'user',
-        content: lastMessage.parts?.find((p: any) => p.type === 'text')?.text || '',
+        content: lastMessage.parts?.find((p: { type: string; text?: string }) => p.type === 'text')?.text || '',
         toolInvocations: null,
       })
     }

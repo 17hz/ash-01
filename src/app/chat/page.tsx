@@ -22,8 +22,7 @@ import {
   List,
   Typography,
   Modal,
-  message,
-  Divider
+  message
 } from 'antd'
 import 'github-markdown-css/github-markdown.css'
 import { FormEvent, useState, useEffect, useRef } from 'react'
@@ -46,7 +45,7 @@ interface DbMessage {
   conversationId: number
   role: string
   content: string
-  toolInvocations: any
+  toolInvocations: unknown
   createdAt: string
 }
 

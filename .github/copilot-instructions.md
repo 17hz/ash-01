@@ -31,6 +31,8 @@ The chat system uses **AI SDK** with **DeepSeek** as the provider:
 
 ## Development Conventions
 
+**Drizzle ORM**: Use `drizzle-kit push` for dev, dont use `migrate` commands in dev.
+
 **Package Manager**: Use `pnpm` exclusively
 **Commands**: 
 - `pnpm dev` (uses Turbopack for faster builds)

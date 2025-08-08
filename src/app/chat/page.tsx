@@ -1,16 +1,91 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
-import { RobotOutlined, SendOutlined, UserOutlined } from '@ant-design/icons'
-import { Avatar, Button, Card, Empty, Input, Space, Spin } from 'antd'
+import { RobotOutlined, SendOutlined, UserOutlined, MessageOutlined, PlusOutlined } from '@ant-design/icons'
+import { Avatar, Button, Card, Empty, Input, Space, Spin, List, Typography, Drawer } from 'antd'
 import 'github-markdown-css/github-markdown.css'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, useEffect } from 'react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
+const { Title } = Typography
+
+interface Conversation {
+  id: string
+  title: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface Message {
+  id: string
+  conversationId: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  createdAt: string
+}
+
 export default function ChatPage() {
-  const { messages, status, sendMessage } = useChat()
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const { messages, status, sendMessage, setMessages } = useChat({
+    api: '/api/chat',
+    body: {
+      conversationId: currentConversationId
+    },
+    onResponse: (response) => {
+      // Get conversation ID from response headers
+      const conversationId = response.headers.get('X-Conversation-ID')
+      if (conversationId && !currentConversationId) {
+        setCurrentConversationId(conversationId)
+        loadConversations()
+      }
+    }
+  })
   const [input, setInput] = useState('')
+
+  // Load conversations on mount
+  useEffect(() => {
+    loadConversations()
+  }, [])
+
+  const loadConversations = async () => {
+    try {
+      const response = await fetch('/api/conversations')
+      const data = await response.json()
+      setConversations(data.conversations)
+    } catch (error) {
+      console.error('Failed to load conversations:', error)
+    }
+  }
+
+  const loadConversationMessages = async (conversationId: string) => {
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/messages`)
+      const data = await response.json()
+      
+      // Convert database messages to UI format
+      const uiMessages = data.messages.map((msg: Message) => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        parts: [{ type: 'text' as const, text: msg.content }]
+      }))
+      
+      setMessages(uiMessages)
+      setCurrentConversationId(conversationId)
+      setDrawerOpen(false)
+    } catch (error) {
+      console.error('Failed to load conversation messages:', error)
+    }
+  }
+
+  const startNewConversation = () => {
+    setMessages([])
+    setCurrentConversationId(null)
+    setDrawerOpen(false)
+  }
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -29,6 +104,25 @@ export default function ChatPage() {
         flexDirection: 'column',
       }}
     >
+      {/* Header with conversation controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Title level={3} style={{ margin: 0 }}>AI 对话</Title>
+        <Space>
+          <Button 
+            icon={<PlusOutlined />} 
+            onClick={startNewConversation}
+            type="primary"
+          >
+            新对话
+          </Button>
+          <Button 
+            icon={<MessageOutlined />} 
+            onClick={() => setDrawerOpen(true)}
+          >
+            历史对话
+          </Button>
+        </Space>
+      </div>
       <div style={{ flex: 1, overflowY: 'auto', marginBottom: 16 }}>
         {messages.length === 0 ? (
           <Empty
@@ -130,6 +224,29 @@ export default function ChatPage() {
           />
         </Space.Compact>
       </form>
+      {/* Conversation history drawer */}
+      <Drawer
+        title="历史对话"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        width={400}
+      >
+        <List
+          dataSource={conversations}
+          renderItem={(conversation) => (
+            <List.Item
+              onClick={() => loadConversationMessages(conversation.id)}
+              style={{ cursor: 'pointer' }}
+              className={currentConversationId === conversation.id ? 'bg-blue-50' : ''}
+            >
+              <List.Item.Meta
+                title={conversation.title}
+                description={new Date(conversation.updatedAt).toLocaleDateString('zh-CN')}
+              />
+            </List.Item>
+          )}
+        />
+      </Drawer>
     </div>
   )
 }

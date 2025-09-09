@@ -1,12 +1,8 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
-import { RobotOutlined, SendOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Empty, Input, Space, Spin } from 'antd'
-import 'github-markdown-css/github-markdown.css'
 import { FormEvent, useState } from 'react'
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 
 export default function ChatPage() {
   const { messages, status, sendMessage } = useChat()

@@ -33,10 +33,14 @@ jobs:
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
-        env: 
-          ANTHROPIC_BASE_URL: ${{secrets.ANTHROPIC_BASE_URL}}
-          ANTHROPIC_AUTH_TOKEN: ${{secrets.ANTHROPIC_AUTH_TOKEN}}
         with:
+          settings: |
+            {
+              env: {
+                "ANTHROPIC_BASE_URL": ${{secrets.ANTHROPIC_BASE_URL}},
+                "ANTHROPIC_AUTH_TOKEN": ${{secrets.ANTHROPIC_AUTH_TOKEN}}
+              }
+            }
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read
